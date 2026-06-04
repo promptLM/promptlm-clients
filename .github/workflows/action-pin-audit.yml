@@ -2,18 +2,46 @@
 # them, weekly on schedule, and on demand. Org composite action lives at
 # promptLM/.github/.github/actions/audit-action-pins (see
 # https://github.com/promptLM/.github/blob/main/.github/actions/README.md).
+#
+# `audit` is a required status check in the `main` branch ruleset, so the
+# workflow must always run on pull_request — otherwise PRs that don't
+# touch `.github/workflows/**` would be blocked forever by an "expected"
+# check that never reports. The job inspects the diff and either runs the
+# real audit or short-circuits to a no-op success.
 name: Action pin audit
 on:
   pull_request:
-    paths: ['.github/workflows/**']
   schedule:
     - cron: '17 6 * * 1'
   workflow_dispatch:
 permissions:
   contents: read
+  pull-requests: read
 jobs:
   audit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-      - uses: promptLM/.github/.github/actions/audit-action-pins@4b0d21dfddaaeb27fe555bd06057dbdcbb501cc5 # 4b0d21d
+
+      - name: Detect whether workflow files changed
+        id: changed
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh pr view "${{ github.event.pull_request.number }}" \
+                --repo "${{ github.repository }}" \
+                --json files --jq '.files[].path' \
+              | grep -qE '^\.github/workflows/'; then
+            echo "workflows=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "workflows=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run audit
+        if: github.event_name != 'pull_request' || steps.changed.outputs.workflows == 'true'
+        uses: promptLM/.github/.github/actions/audit-action-pins@4b0d21dfddaaeb27fe555bd06057dbdcbb501cc5 # 4b0d21d
+
+      - name: No-op (no workflow files changed)
+        if: github.event_name == 'pull_request' && steps.changed.outputs.workflows != 'true'
+        run: echo "No .github/workflows/** files changed in this PR; audit is a no-op."

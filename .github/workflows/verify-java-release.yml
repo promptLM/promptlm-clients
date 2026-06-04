@@ -1,15 +1,17 @@
 name: Verify Java Release Build
 
+# The `verify-release-build` job is a required status check in the `main`
+# branch ruleset. GitHub treats a required check that never reports as
+# "expected" indefinitely, which would block every PR that doesn't touch
+# Java paths (action bumps, Python-only changes, etc).
+#
+# So the workflow always runs on pull_request; the job inspects the diff
+# and either runs the real Maven verify or short-circuits to a no-op,
+# either way reporting `verify-release-build = success`. On push to main
+# we keep the paths filter — no required-check semantics there.
+
 on:
   pull_request:
-    paths:
-      - ".github/workflows/verify-java-release.yml"
-      - ".github/workflows/release-java.yml"
-      - "build-jdk.sh"
-      - "pom.xml"
-      - "client-sdk-java/**"
-      - "docs/releasing-java.md"
-      - "LICENSE"
   push:
     branches:
       - main
@@ -29,7 +31,24 @@ jobs:
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
+      - name: Detect whether Java release paths changed
+        id: changed
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          paths_regex='^(\.github/workflows/(verify-java-release|release-java)\.yml|build-jdk\.sh|pom\.xml|client-sdk-java/|docs/releasing-java\.md|LICENSE$)'
+          if gh pr view "${{ github.event.pull_request.number }}" \
+                --repo "${{ github.repository }}" \
+                --json files --jq '.files[].path' \
+              | grep -qE "$paths_regex"; then
+            echo "java=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "java=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Java
+        if: github.event_name != 'pull_request' || steps.changed.outputs.java == 'true'
         uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           distribution: temurin
@@ -37,4 +56,9 @@ jobs:
           cache: maven
 
       - name: Verify release profile
+        if: github.event_name != 'pull_request' || steps.changed.outputs.java == 'true'
         run: ./mvnw -B -Prelease-java -pl client-sdk-java -am -Dgpg.skip=true -DskipTests verify
+
+      - name: No-op (no Java release paths changed)
+        if: github.event_name == 'pull_request' && steps.changed.outputs.java != 'true'
+        run: echo "No Java release paths changed in this PR; verify-release-build is a no-op."
