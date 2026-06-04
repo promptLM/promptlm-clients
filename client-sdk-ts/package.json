@@ -1,0 +1,45 @@
+{
+  "name": "@promptlm/client",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for promptLM JSON prompt bundles",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "resources"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "lint": "eslint .",
+    "smoke": "node scripts/smoke-install.mjs",
+    "verify": "npm run build && npm run test && npm run smoke"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "@typescript-eslint/eslint-plugin": "^8.45.0",
+    "@typescript-eslint/parser": "^8.45.0",
+    "eslint": "^9.37.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
