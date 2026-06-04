@@ -1,9 +1,22 @@
-# Keep GitHub Actions refs (and their SHA pins) current. Other
-# ecosystems intentionally not enabled here — add them deliberately so
-# the maintainer can stage the resulting PR flow.
+# Dependabot version updates — promptlm-clients
+# Org template: https://github.com/promptLM/.github/blob/main/dependabot.template.yml
+#
+# Keep GitHub Actions refs (and their SHA pins) current. Add `npm`
+# (client-sdk-ts/) and `pip` (client-sdk-python/) entries when those SDKs
+# ship their package.json / pyproject.toml manifests (Phase 1 of the 0.1.0
+# runbook).
+
 version: 2
 updates:
   - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "is: chore"
+      - "in: deps"
+
+  - package-ecosystem: "maven"
     directory: "/"
     schedule:
       interval: "weekly"
