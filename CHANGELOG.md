@@ -7,8 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - TBD
+## [0.1.0] - 2026-06-07
 
 ### Added
 
 - Java client published to Maven Central as `dev.promptlm:promptlm-client`.
+- Python client published to PyPI as `promptlm-client` (sdist + wheel, Python ≥3.10).
+- TypeScript client published to npm as `@promptlm/client` (ESM + CJS, Node ≥20).

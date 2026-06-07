@@ -21,7 +21,7 @@ jobs:
       contents: read
     defaults:
       run:
-        working-directory: client-ts
+        working-directory: client-sdk-ts
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -31,7 +31,7 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
-          cache-dependency-path: client-ts/package-lock.json
+          cache-dependency-path: client-sdk-ts/package-lock.json
 
       - name: Resolve release version
         id: version
@@ -77,7 +77,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: node-dist
-          path: client-ts/*.tgz
+          path: client-sdk-ts/*.tgz
           if-no-files-found: error
           retention-days: 7
 
@@ -92,7 +92,7 @@ jobs:
       id-token: write   # required for npm --provenance attestation
     defaults:
       run:
-        working-directory: client-ts
+        working-directory: client-sdk-ts
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       # Once npm Trusted Publishing is configured for @promptlm/client at
@@ -107,7 +107,7 @@ jobs:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
-          cache-dependency-path: client-ts/package-lock.json
+          cache-dependency-path: client-sdk-ts/package-lock.json
 
       - name: Install dependencies
         run: npm ci

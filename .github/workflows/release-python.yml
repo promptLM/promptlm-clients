@@ -17,7 +17,7 @@ jobs:
       contents: read
     defaults:
       run:
-        working-directory: client-python
+        working-directory: client-sdk-python
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -62,7 +62,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: python-dist
-          path: client-python/dist/*
+          path: client-sdk-python/dist/*
           if-no-files-found: error
           retention-days: 7
 
@@ -78,7 +78,7 @@ jobs:
       id-token: write   # required for PyPI OIDC trusted publishing
     defaults:
       run:
-        working-directory: client-python
+        working-directory: client-sdk-python
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
@@ -94,7 +94,7 @@ jobs:
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           name: python-dist
-          path: client-python/dist
+          path: client-sdk-python/dist
 
       - name: Publish to PyPI
         run: uv publish
