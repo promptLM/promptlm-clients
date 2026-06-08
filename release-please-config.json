@@ -1,0 +1,30 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "simple",
+  "include-component-in-tag": true,
+  "separate-pull-requests": true,
+  "packages": {
+    "client-sdk-java": {
+      "release-type": "simple",
+      "package-name": "promptlm-client",
+      "component": "client-sdk-java",
+      "extra-files": [
+        {
+          "type": "xml",
+          "path": "/pom.xml",
+          "xpath": "//*[local-name()='revision']"
+        }
+      ]
+    },
+    "client-sdk-python": {
+      "release-type": "python",
+      "package-name": "promptlm-client",
+      "component": "client-sdk-python"
+    },
+    "client-sdk-ts": {
+      "release-type": "node",
+      "package-name": "@promptlm/client",
+      "component": "client-sdk-ts"
+    }
+  }
+}
