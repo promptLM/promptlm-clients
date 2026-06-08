@@ -53,7 +53,7 @@ Identical to the previous inline CI logic:
 ```
 tools/consumer-smoke/
   python/
-    smoke.sh      poll-install promptlm-client==<version> from PyPI
+    smoke.sh      poll-install promptlm==<version> from PyPI
     smoke.py      consumer: loads translate prompt and asserts payload
   ts/
     smoke.sh      poll-install @promptlm/client@<version> from npm

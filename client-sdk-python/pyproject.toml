@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "promptlm-client"
+name = "promptlm"
 version = "0.1.0"
 description = "Python SDK for promptLM JSON prompt bundles"
 readme = "README.md"
@@ -38,20 +38,20 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/promptlm_client"]
+packages = ["src/promptlm"]
 artifacts = [
-  "src/promptlm_client/resources/prompts/**/*.json",
+  "src/promptlm/resources/prompts/**/*.json",
 ]
 
 [tool.hatch.build.targets.sdist]
 include = [
-  "src/promptlm_client",
+  "src/promptlm",
   "tests",
   "README.md",
   "pyproject.toml",
 ]
 artifacts = [
-  "src/promptlm_client/resources/prompts/**/*.json",
+  "src/promptlm/resources/prompts/**/*.json",
 ]
 
 [tool.ruff]
@@ -76,7 +76,7 @@ ignore = []
 [tool.mypy]
 python_version = "3.10"
 strict = true
-files = ["src/promptlm_client"]
+files = ["src/promptlm"]
 warn_unused_configs = true
 warn_unused_ignores = true
 warn_redundant_casts = true

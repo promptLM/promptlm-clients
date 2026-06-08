@@ -5,7 +5,7 @@ This repository ships three client SDKs:
 | Language   | Coordinates                    | Channel        |
 |------------|--------------------------------|----------------|
 | Java       | `dev.promptlm:promptlm-client` | Maven Central  |
-| Python     | `promptlm-client`              | PyPI           |
+| Python     | `promptlm`                     | PyPI           |
 | TypeScript | `@promptlm/client`             | npm            |
 
 Per-language mechanical details (build commands, signing, secrets) live

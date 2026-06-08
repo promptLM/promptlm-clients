@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Post-publish Python consumer smoke.
 #
-# Installs `promptlm-client==<version>` from PyPI into a throwaway venv and
+# Installs `promptlm==<version>` from PyPI into a throwaway venv and
 # runs smoke.py to load the bundled `translate` prompt fixture and assert its
 # payload.
 #
@@ -26,9 +26,9 @@ python -m venv "${VENV_DIR}"
 # seconds. Retry up to ~5 min (10 attempts * 30s).
 installed=0
 for attempt in $(seq 1 10); do
-  echo "Attempt ${attempt}: installing promptlm-client==${VERSION}"
-  if "${VENV_DIR}/bin/pip" install --no-cache-dir "promptlm-client==${VERSION}"; then
-    echo "Installed promptlm-client==${VERSION}"
+  echo "Attempt ${attempt}: installing promptlm==${VERSION}"
+  if "${VENV_DIR}/bin/pip" install --no-cache-dir "promptlm==${VERSION}"; then
+    echo "Installed promptlm==${VERSION}"
     installed=1
     break
   fi
@@ -37,7 +37,7 @@ for attempt in $(seq 1 10); do
 done
 
 if [ "${installed}" -ne 1 ]; then
-  echo "promptlm-client==${VERSION} not installable from PyPI after retries." >&2
+  echo "promptlm==${VERSION} not installable from PyPI after retries." >&2
   exit 1
 fi
 

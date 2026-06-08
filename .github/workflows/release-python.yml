@@ -23,7 +23,7 @@ jobs:
   release:
     uses: promptLM/.github/.github/workflows/release-python-pypi.yml@main
     with:
-      package-name: promptlm-client
+      package-name: promptlm
       package-dir: client-sdk-python
       version: ${{ inputs.version }}
       dry-run: ${{ inputs.dry-run }}
