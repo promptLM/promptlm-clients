@@ -1,0 +1,51 @@
+name: Release SDKs (umbrella)
+
+# Top-level umbrella workflow that fans out a single (version, dry-run) input to
+# each of the three per-SDK caller workflows. This is the entry point that the
+# org-level release-train.yml will dispatch.
+#
+# Each per-SDK caller is itself a thin shim around an org-wide reusable
+# workflow:
+#   - release-java.yml       -> Maven Central (secrets-based, needs secrets: inherit)
+#   - release-python.yml     -> PyPI Trusted Publishing (OIDC, no secrets)
+#   - release-typescript.yml -> npm Trusted Publishing + provenance (OIDC, no secrets)
+#
+# NOTE: Requires `workflow_call:` triggers (with matching `version` + `dry-run`
+# inputs) on all three callers. See PR body for the merge-order dependency.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (e.g. 0.1.0)
+        required: true
+        type: string
+      dry-run:
+        description: Build/verify only; do not publish to Maven Central, PyPI, or npm
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  java:
+    uses: ./.github/workflows/release-java.yml
+    with:
+      version: ${{ inputs.version }}
+      dry-run: ${{ inputs.dry-run }}
+    secrets: inherit
+
+  python:
+    uses: ./.github/workflows/release-python.yml
+    with:
+      version: ${{ inputs.version }}
+      dry-run: ${{ inputs.dry-run }}
+    # NO `secrets: inherit` — PyPI publish uses OIDC Trusted Publishing.
+
+  typescript:
+    uses: ./.github/workflows/release-typescript.yml
+    with:
+      version: ${{ inputs.version }}
+      dry-run: ${{ inputs.dry-run }}
+    # NO `secrets: inherit` — npm publish uses OIDC Trusted Publishing + provenance.
