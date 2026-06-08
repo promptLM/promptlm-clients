@@ -39,3 +39,26 @@ jobs:
       version: ${{ inputs.version }}
       dry-run: ${{ inputs.dry-run }}
     # NO `secrets: inherit` — npm publish uses OIDC Trusted Publishing + provenance.
+
+  consumer-smoke:
+    # Post-publish verification: install the just-published tarball from npm
+    # (NOT from the workspace) and exercise the loader against the bundled
+    # `translate` fixture. Catches missing files in `package.json#files` and
+    # npm CDN propagation issues that pre-publish smoke can't.
+    #
+    # The actual install + assertions live in tools/consumer-smoke/ts/ so
+    # they can be run and debugged locally; see that README.
+    needs: release
+    if: ${{ inputs.dry-run != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "20"
+
+      - name: Smoke
+        run: tools/consumer-smoke/ts/smoke.sh "${{ inputs.version }}"

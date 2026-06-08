@@ -42,3 +42,31 @@ jobs:
       dry-run: ${{ inputs.dry-run }}
       probe-path: dev/promptlm/promptlm-client
     secrets: inherit
+
+  consumer-smoke:
+    # Post-publish verification: pull `dev.promptlm:promptlm-client:${VERSION}`
+    # from Maven Central (NOT from the workspace) and exercise
+    # ClasspathPromptLoader against the bundled `translate` fixture.
+    #
+    # Maven Central sync (Sonatype Central Portal -> Maven Central index ->
+    # repo1.maven.org) can take ~30 min, occasionally longer. The script
+    # polls with `dependency:get` until it resolves, with a 45-minute job
+    # timeout as backstop.
+    #
+    # The actual poll + assertions live in tools/consumer-smoke/java/ so
+    # they can be run and debugged locally; see that README.
+    needs: release
+    if: ${{ inputs.dry-run != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Smoke
+        run: tools/consumer-smoke/java/smoke.sh "${{ inputs.version }}"
