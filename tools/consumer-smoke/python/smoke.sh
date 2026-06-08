@@ -1,22 +1,7 @@
 #!/usr/bin/env bash
-#
-# Copyright 2025 promptLM
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 # Post-publish Python consumer smoke.
 #
-# Installs `promptlm==<version>` from PyPI into a throwaway venv and
+# Installs `promptlm-client==<version>` from PyPI into a throwaway venv and
 # runs smoke.py to load the bundled `translate` prompt fixture and assert its
 # payload.
 #
@@ -41,9 +26,9 @@ python -m venv "${VENV_DIR}"
 # seconds. Retry up to ~5 min (10 attempts * 30s).
 installed=0
 for attempt in $(seq 1 10); do
-  echo "Attempt ${attempt}: installing promptlm==${VERSION}"
-  if "${VENV_DIR}/bin/pip" install --no-cache-dir "promptlm==${VERSION}"; then
-    echo "Installed promptlm==${VERSION}"
+  echo "Attempt ${attempt}: installing promptlm-client==${VERSION}"
+  if "${VENV_DIR}/bin/pip" install --no-cache-dir "promptlm-client==${VERSION}"; then
+    echo "Installed promptlm-client==${VERSION}"
     installed=1
     break
   fi
@@ -52,7 +37,7 @@ for attempt in $(seq 1 10); do
 done
 
 if [ "${installed}" -ne 1 ]; then
-  echo "promptlm==${VERSION} not installable from PyPI after retries." >&2
+  echo "promptlm-client==${VERSION} not installable from PyPI after retries." >&2
   exit 1
 fi
 

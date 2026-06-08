@@ -53,7 +53,7 @@ class DirectoryPromptSource:
 
 
 class PackageResourcePromptSource:
-    def __init__(self, package: str = "promptlm.resources") -> None:
+    def __init__(self, package: str = "promptlm_client.resources") -> None:
         self._root = resources.files(package)
 
     def read_text(self, relative_path: str) -> str:

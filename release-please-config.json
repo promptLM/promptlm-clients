@@ -18,7 +18,7 @@
     },
     "client-sdk-python": {
       "release-type": "python",
-      "package-name": "promptlm",
+      "package-name": "promptlm-client",
       "component": "client-sdk-python"
     },
     "client-sdk-ts": {
