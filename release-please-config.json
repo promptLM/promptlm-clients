@@ -7,6 +7,7 @@
     "client-sdk-java": {
       "release-type": "simple",
       "package-name": "promptlm-client",
+      "component": "client-sdk-java",
       "extra-files": [
         {
           "type": "xml",
@@ -17,11 +18,13 @@
     },
     "client-sdk-python": {
       "release-type": "python",
-      "package-name": "promptlm-client"
+      "package-name": "promptlm-client",
+      "component": "client-sdk-python"
     },
     "client-sdk-ts": {
       "release-type": "node",
-      "package-name": "@promptlm/client"
+      "package-name": "@promptlm/client",
+      "component": "client-sdk-ts"
     }
   }
 }
