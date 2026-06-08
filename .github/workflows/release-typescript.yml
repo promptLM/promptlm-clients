@@ -1,0 +1,33 @@
+name: Release TypeScript SDK
+
+# Thin caller for the org-wide reusable TypeScript publish workflow.
+# The reusable owns: validate -> verify (eslint/tsc/vitest) -> build (tsup)
+# -> npm publish with Trusted Publishing (OIDC) + provenance.
+#
+# Filename note: the npm Trusted Publisher must be configured to match this
+# exact filename (release-typescript.yml). Tracked in issue #50.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release version (e.g. 0.1.0)
+        required: true
+        type: string
+      dry-run:
+        description: Build only; skip npm publish
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    uses: promptLM/.github/.github/workflows/release-ts-npm.yml@main
+    with:
+      package-name: '@promptlm/client'
+      package-dir: client-sdk-ts
+      version: ${{ inputs.version }}
+      dry-run: ${{ inputs.dry-run }}
+    # NO `secrets: inherit` — npm publish uses OIDC Trusted Publishing + provenance.

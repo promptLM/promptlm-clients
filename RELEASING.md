@@ -43,7 +43,7 @@ from the Actions tab:
 
 - **Java** → `release-java` → `version=X.Y.Z`
 - **Python** → `release-python` → `version=X.Y.Z`
-- **TypeScript** → `release-node` → `version=X.Y.Z`
+- **TypeScript** → `release-typescript` → `version=X.Y.Z`
 
 Each workflow runs its verify gate, builds, signs (GPG for Maven
 Central; OIDC provenance for npm), publishes to the channel, tags the
