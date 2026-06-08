@@ -18,6 +18,14 @@ on:
         description: Build only; skip npm publish
         type: boolean
         default: false
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+      dry-run:
+        type: boolean
+        default: false
 
 permissions:
   contents: read
