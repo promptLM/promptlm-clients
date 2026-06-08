@@ -42,3 +42,133 @@ jobs:
       dry-run: ${{ inputs.dry-run }}
       probe-path: dev/promptlm/promptlm-client
     secrets: inherit
+
+  consumer-smoke:
+    # Post-publish verification: pull `dev.promptlm:promptlm-client:${VERSION}`
+    # from Maven Central (NOT from the workspace) and exercise
+    # ClasspathPromptLoader against the bundled `translate` fixture.
+    #
+    # Maven Central sync (Sonatype Central Portal -> Maven Central index ->
+    # repo1.maven.org) can take ~30 min, occasionally longer. We poll with
+    # `dependency:get` until it resolves, with a 45-minute job timeout.
+    needs: release
+    if: ${{ inputs.dry-run != true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Java
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Scaffold consumer project and resources
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/smoke/src/main/java/dev/promptlm/smoke
+          mkdir -p /tmp/smoke/src/main/resources/prompts/text/translate
+
+          cat > /tmp/smoke/src/main/resources/prompts/prompt-index.json <<'EOF'
+          [
+            {
+              "id": "translate",
+              "version": "1.0.0",
+              "name": "Text Translator",
+              "path": "prompts/text/translate/promptlm.yml"
+            }
+          ]
+          EOF
+
+          cat > /tmp/smoke/src/main/resources/prompts/text/translate/promptlm.yml <<'EOF'
+          id: translate
+          name: Text Translator
+          version: 1.0.0
+          prompt: |
+            Translate the following text.
+          EOF
+
+          cat > /tmp/smoke/src/main/java/dev/promptlm/smoke/SmokeConsumer.java <<'EOF'
+          package dev.promptlm.smoke;
+          import dev.promptlm.client.ClasspathPromptLoader;
+          import dev.promptlm.client.Prompt;
+          public class SmokeConsumer {
+              public static void main(String[] args) {
+                  Prompt p = new ClasspathPromptLoader().loadPrompt("translate");
+                  if (!"Translate the following text.\n".equals(p.getPrompt())) {
+                      throw new AssertionError("Unexpected prompt body: " + p.getPrompt());
+                  }
+                  if (!"Text Translator".equals(p.getName())) {
+                      throw new AssertionError("Unexpected prompt name: " + p.getName());
+                  }
+                  System.out.println("consumer-smoke OK: " + p.getId() + " " + p.getVersion());
+              }
+          }
+          EOF
+
+          cat > /tmp/smoke/pom.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <project xmlns="http://maven.apache.org/POM/4.0.0">
+            <modelVersion>4.0.0</modelVersion>
+            <groupId>dev.promptlm.smoke</groupId>
+            <artifactId>consumer-smoke</artifactId>
+            <version>0.0.1</version>
+            <packaging>jar</packaging>
+            <properties>
+              <maven.compiler.release>17</maven.compiler.release>
+              <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+            </properties>
+            <dependencies>
+              <dependency>
+                <groupId>dev.promptlm</groupId>
+                <artifactId>promptlm-client</artifactId>
+                <version>${VERSION}</version>
+              </dependency>
+            </dependencies>
+            <build>
+              <plugins>
+                <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>exec-maven-plugin</artifactId>
+                  <version>3.5.0</version>
+                  <configuration>
+                    <mainClass>dev.promptlm.smoke.SmokeConsumer</mainClass>
+                  </configuration>
+                </plugin>
+              </plugins>
+            </build>
+          </project>
+          EOF
+
+      - name: Poll Maven Central until artifact is resolvable
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -u
+          cd /tmp/smoke
+          # Maven Central sync can take ~30 min after a Portal promotion.
+          # Poll up to ~40 min (40 attempts * 60s), then let the job timeout
+          # backstop at 45 min.
+          for attempt in $(seq 1 40); do
+            echo "Attempt ${attempt}: resolving dev.promptlm:promptlm-client:${VERSION} from Maven Central"
+            if mvn -B -q -U \
+                org.apache.maven.plugins:maven-dependency-plugin:3.6.1:get \
+                -DremoteRepositories=central::default::https://repo1.maven.org/maven2 \
+                -Dartifact="dev.promptlm:promptlm-client:${VERSION}"; then
+              echo "Artifact resolved."
+              exit 0
+            fi
+            echo "Not yet resolvable; sleeping 60s before retry."
+            sleep 60
+          done
+          echo "dev.promptlm:promptlm-client:${VERSION} not on Maven Central after polling." >&2
+          exit 1
+
+      - name: Build and run consumer
+        run: |
+          cd /tmp/smoke
+          mvn -B -q package
+          mvn -B -q exec:java
