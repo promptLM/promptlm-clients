@@ -32,6 +32,10 @@ permissions:
 
 jobs:
   release:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     uses: promptLM/.github/.github/workflows/release-ts-npm.yml@main
     with:
       package-name: '@promptlm/client'

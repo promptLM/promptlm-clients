@@ -21,6 +21,10 @@ on:
 
 jobs:
   release:
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
     uses: promptLM/.github/.github/workflows/release-python-pypi.yml@main
     with:
       package-name: promptlm
