@@ -45,6 +45,9 @@ jobs:
     # (NOT from the workspace) and exercise the loader against the bundled
     # `translate` fixture. Catches missing files in `package.json#files` and
     # npm CDN propagation issues that pre-publish smoke can't.
+    #
+    # The actual install + assertions live in tools/consumer-smoke/ts/ so
+    # they can be run and debugged locally; see that README.
     needs: release
     if: ${{ inputs.dry-run != true }}
     runs-on: ubuntu-latest
@@ -57,37 +60,5 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install @promptlm/client@${{ inputs.version }} from npm (poll-retry)
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          mkdir -p /tmp/smoke && cd /tmp/smoke
-          npm init -y >/dev/null
-          # npm CDN can lag a couple of minutes after publish. Retry up to
-          # ~5 min (10 attempts * 30s).
-          for attempt in $(seq 1 10); do
-            echo "Attempt ${attempt}: installing @promptlm/client@${VERSION}"
-            if npm install --no-audit --no-fund "@promptlm/client@${VERSION}"; then
-              echo "Installed @promptlm/client@${VERSION}"
-              exit 0
-            fi
-            echo "Install failed; sleeping 30s before retry."
-            sleep 30
-          done
-          echo "@promptlm/client@${VERSION} not installable from npm after retries." >&2
-          exit 1
-
-      - name: Run inline consumer (load translate, assert payload)
-        run: |
-          cat > /tmp/smoke/check.mjs <<'EOF'
-          import { JsonPromptLoader, PackageResourcePromptSource } from '@promptlm/client';
-          const prompt = await new JsonPromptLoader(new PackageResourcePromptSource()).loadPrompt('translate');
-          if (prompt.prompt !== 'Translate the following text.\n') {
-            throw new Error(`Unexpected prompt payload: ${JSON.stringify(prompt.prompt)}`);
-          }
-          if (prompt.name !== 'Text Translator') {
-            throw new Error(`Unexpected prompt name: ${prompt.name}`);
-          }
-          console.log('consumer-smoke OK:', prompt.id, prompt.version);
-          EOF
-          node /tmp/smoke/check.mjs
+      - name: Smoke
+        run: tools/consumer-smoke/ts/smoke.sh "${{ inputs.version }}"

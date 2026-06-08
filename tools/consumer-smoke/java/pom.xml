@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Standalone consumer smoke for dev.promptlm:promptlm-client.
+
+  NOTE: this pom is intentionally NOT parented on the repo's build pom.
+  It is meant to behave like an outside consumer that resolves the
+  published artifact from Maven Central.
+
+  The promptlm-client version is injected via the `promptlm.version`
+  Maven property; see ./smoke.sh.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>dev.promptlm.smoke</groupId>
+  <artifactId>consumer-smoke</artifactId>
+  <version>0.0.1</version>
+  <packaging>jar</packaging>
+
+  <properties>
+    <maven.compiler.release>17</maven.compiler.release>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Overridden via -Dpromptlm.version=<version> by smoke.sh -->
+    <promptlm.version>0.0.0</promptlm.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>dev.promptlm</groupId>
+      <artifactId>promptlm-client</artifactId>
+      <version>${promptlm.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <configuration>
+          <mainClass>dev.promptlm.smoke.Smoke</mainClass>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

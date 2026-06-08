@@ -34,6 +34,9 @@ jobs:
     # (NOT from the workspace) and exercise the loader against the bundled
     # `translate` fixture. Catches missing files in the published artifact
     # and PyPI propagation/serving issues that pre-publish smoke can't.
+    #
+    # The actual install + assertions live in tools/consumer-smoke/python/
+    # so they can be run and debugged locally; see that README.
     needs: release
     if: ${{ inputs.dry-run != true }}
     runs-on: ubuntu-latest
@@ -46,31 +49,5 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install promptlm-client==${{ inputs.version }} from PyPI (poll-retry)
-        env:
-          VERSION: ${{ inputs.version }}
-        run: |
-          python -m venv /tmp/smoke-venv
-          # PyPI propagates fast but the just-published index can lag a few
-          # seconds. Retry up to ~5 min (10 attempts * 30s).
-          for attempt in $(seq 1 10); do
-            echo "Attempt ${attempt}: installing promptlm-client==${VERSION}"
-            if /tmp/smoke-venv/bin/pip install --no-cache-dir "promptlm-client==${VERSION}"; then
-              echo "Installed promptlm-client==${VERSION}"
-              exit 0
-            fi
-            echo "Install failed; sleeping 30s before retry."
-            sleep 30
-          done
-          echo "promptlm-client==${VERSION} not installable from PyPI after retries." >&2
-          exit 1
-
-      - name: Run inline consumer (load translate, assert payload)
-        run: |
-          /tmp/smoke-venv/bin/python -c "
-          from promptlm_client import JsonPromptLoader, PackageResourcePromptSource
-          prompt = JsonPromptLoader(PackageResourcePromptSource()).load_prompt('translate')
-          assert prompt.prompt == 'Translate the following text.\n', repr(prompt.prompt)
-          assert prompt.name == 'Text Translator', repr(prompt.name)
-          print('consumer-smoke OK:', prompt.id, prompt.version)
-          "
+      - name: Smoke
+        run: tools/consumer-smoke/python/smoke.sh "${{ inputs.version }}"
