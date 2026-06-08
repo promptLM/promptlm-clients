@@ -18,12 +18,12 @@ Loads the bundled `translate` prompt via the package's
 `PackageResourcePromptSource` and asserts the payload matches
 `fixtures/prompt-bundle/prompts/text/translate/promptlm.json`.
 
-The install of `promptlm==<version>` is done by the wrapper
+The install of `promptlm-client==<version>` is done by the wrapper
 `smoke.sh`; this script just imports the installed package and runs the
 assertions.
 """
 
-from promptlm import JsonPromptLoader, PackageResourcePromptSource
+from promptlm_client import JsonPromptLoader, PackageResourcePromptSource
 
 
 def main() -> None:

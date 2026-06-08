@@ -44,7 +44,7 @@ def main() -> None:
             "--no-deps",
             cwd=PACKAGE_ROOT,
         )
-        wheel = next(wheelhouse.glob("promptlm-*.whl"))
+        wheel = next(wheelhouse.glob("promptlm_client-*.whl"))
 
         run(sys.executable, "-m", "venv", str(venv_dir), cwd=PACKAGE_ROOT)
         venv_python = venv_dir / (
@@ -55,7 +55,7 @@ def main() -> None:
             str(venv_python),
             "-c",
             (
-                "from promptlm import JsonPromptLoader, "
+                "from promptlm_client import JsonPromptLoader, "
                 "PackageResourcePromptSource; "
                 "prompt = JsonPromptLoader("
                 "PackageResourcePromptSource()).load_prompt('translate'); "
