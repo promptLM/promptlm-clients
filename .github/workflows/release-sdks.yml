@@ -26,7 +26,9 @@ on:
         default: false
 
 permissions:
-  contents: read
+  contents: write       # release-please creates tags + GH releases
+  attestations: write   # SLSA provenance (all three SDKs)
+  id-token: write       # OIDC: Sigstore + PyPI + npm trusted publishing
 
 jobs:
   java:
