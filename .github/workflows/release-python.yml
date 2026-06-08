@@ -10,6 +10,14 @@ on:
         description: Build only; do not publish
         type: boolean
         default: false
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+      dry-run:
+        type: boolean
+        default: false
 
 jobs:
   release:
